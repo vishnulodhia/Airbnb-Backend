@@ -1,6 +1,7 @@
 package com.spring_boot.Airbnb.Model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -47,6 +48,7 @@ public class Hotel {
     @JoinColumn(name = "user_id")
     private User owner;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "hotel",fetch = FetchType.LAZY,cascade = CascadeType.ALL,orphanRemoval = true)
     private List<Room> rooms;
 }

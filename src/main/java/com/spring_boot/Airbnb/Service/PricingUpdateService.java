@@ -37,7 +37,7 @@ public class PricingUpdateService {
     private final PricingService pricingService;
 
 
-    @Scheduled(cron = "*/5 * * * * *")
+//    @Scheduled(cron = "")
     public void updatePrice(){
     int page =0;
     int batchSize = 100;

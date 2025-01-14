@@ -7,4 +7,9 @@ import lombok.Data;
 public class HotelPriceDto {
     private Hotel hotel;
     private  Double price;
+
+    public HotelPriceDto(Hotel hotel, Double averagePrice) {
+        this.hotel = hotel;
+        this.price = averagePrice;
+    }
 }
