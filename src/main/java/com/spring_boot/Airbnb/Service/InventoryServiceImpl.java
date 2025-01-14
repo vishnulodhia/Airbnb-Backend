@@ -1,10 +1,12 @@
 package com.spring_boot.Airbnb.Service;
 
 import com.spring_boot.Airbnb.Dto.HotelDto;
+import com.spring_boot.Airbnb.Dto.HotelPriceDto;
 import com.spring_boot.Airbnb.Dto.HotelSearchRequest;
 import com.spring_boot.Airbnb.Model.Hotel;
 import com.spring_boot.Airbnb.Model.Inventory;
 import com.spring_boot.Airbnb.Model.Room;
+import com.spring_boot.Airbnb.Repository.HotelMinRepository;
 import com.spring_boot.Airbnb.Repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class InventoryServiceImpl implements InventoryService{
 
     private final InventoryRepository inventoryRepository;
     private final ModelMapper mapper;
+    private final HotelMinRepository hotelMinRepository;
 
 
 
@@ -66,14 +69,14 @@ public class InventoryServiceImpl implements InventoryService{
     }
 
     @Override
-    public Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
+    public Page<HotelPriceDto> searchHotels(HotelSearchRequest hotelSearchRequest) {
         log.info("searching hotels for {} city from {} to {}",hotelSearchRequest.getCity(),hotelSearchRequest.getStartDate(),hotelSearchRequest.getEndDate());
         Pageable pageable = PageRequest.of(hotelSearchRequest.getPage(),hotelSearchRequest.getSize());
         log.info("hotelSearchRequest: {}",hotelSearchRequest);
         Long dateCount  = ChronoUnit.DAYS.between(hotelSearchRequest.getStartDate(),hotelSearchRequest.getEndDate())+1;
         log.info("betweenDays: {}",dateCount);
-        Page<Hotel> hotelpage = inventoryRepository.findHotelWithAvailableInventory(hotelSearchRequest.getCity(),hotelSearchRequest.getStartDate(),hotelSearchRequest.getEndDate(),hotelSearchRequest.getRoomCount(),dateCount,pageable);
+        Page<HotelPriceDto> hotelpage = hotelMinRepository.findHotelWithAvailableInventory(hotelSearchRequest.getCity(),hotelSearchRequest.getStartDate(),hotelSearchRequest.getEndDate(),hotelSearchRequest.getRoomCount(),dateCount,pageable);
         log.info("hotelPage: {}",hotelpage.getContent());
-        return hotelpage.map(hotel -> mapper.map(hotel,HotelDto.class));
+        return hotelpage;
     }
 }
