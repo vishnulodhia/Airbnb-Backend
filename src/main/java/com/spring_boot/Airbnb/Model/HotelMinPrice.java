@@ -1,59 +1,44 @@
 package com.spring_boot.Airbnb.Model;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Setter
 @Getter
-@ToString
-public class Room{
-
+public class HotelMinPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "hotel_id", nullable = false)
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id",nullable = false)
     private Hotel hotel;
 
     @Column(nullable = false)
-    private String type;
-
-    @Column(nullable = false)
-    private Integer totalCount;
-
-    @Column(nullable = false)
-    private Integer capacity;
+    private LocalDate date;
 
     @Column(nullable = false,precision = 10, scale = 2)
-    private BigDecimal basePrice;
-
-    @Column(columnDefinition = "text[]")
-    private String[] photos;
-
-    @Column(columnDefinition = "text[]")
-    private String[] amenities;
+    private BigDecimal price;
 
     @CreationTimestamp
-    @Column(updatable = false)
     private LocalDateTime createAt;
 
     @UpdateTimestamp
     private LocalDateTime updateAt;
 
-    @Column(nullable = false)
-    private Boolean active;
-
-
+    public HotelMinPrice(Hotel hotel, LocalDate date){
+        this.hotel = hotel;
+        this.date = date;
+    }
 }
