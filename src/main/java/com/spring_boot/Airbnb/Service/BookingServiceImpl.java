@@ -4,12 +4,14 @@ import com.spring_boot.Airbnb.Dto.BookingDto;
 import com.spring_boot.Airbnb.Dto.BookingRequest;
 import com.spring_boot.Airbnb.Dto.GuestDto;
 import com.spring_boot.Airbnb.Exceptions.ResourceNotFoundExceptions;
+import com.spring_boot.Airbnb.Exceptions.UnAuthorisedException;
 import com.spring_boot.Airbnb.Model.*;
 import com.spring_boot.Airbnb.Repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 
@@ -80,6 +82,13 @@ public class BookingServiceImpl implements BookingService {
         log.info("Adding guests for booking with id: {}",bookingId);
         Booking booking = bookingRepository.findById(bookingId).orElseThrow(()-> new ResourceNotFoundExceptions("Booking not found with id: "+bookingId));
 
+
+        User user = getCurrentUser();
+
+        if(!user.equals(booking.getUser())){
+            throw new UnAuthorisedException("Booking is not under reserved state, cannot add guests");
+        }
+
         if(hasBookingExpire(booking)){
         throw new IllegalStateException("Booking has already expire");
         }
@@ -111,8 +120,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     public User getCurrentUser(){
-        Optional<User> user = userRepository.findById(Long.valueOf(1));
-        return user.get();
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
 }

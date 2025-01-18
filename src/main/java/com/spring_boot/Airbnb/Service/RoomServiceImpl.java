@@ -2,14 +2,17 @@ package com.spring_boot.Airbnb.Service;
 
 import com.spring_boot.Airbnb.Dto.RoomDto;
 import com.spring_boot.Airbnb.Exceptions.ResourceNotFoundExceptions;
+import com.spring_boot.Airbnb.Exceptions.UnAuthorisedException;
 import com.spring_boot.Airbnb.Model.Hotel;
 import com.spring_boot.Airbnb.Model.Room;
+import com.spring_boot.Airbnb.Model.User;
 import com.spring_boot.Airbnb.Repository.HotelRepository;
 import com.spring_boot.Airbnb.Repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -33,7 +36,10 @@ public class RoomServiceImpl implements RoomService{
 
         Hotel hotel = hotelRepository.findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundExceptions("hotel not found with ID: " + hotelId));
-
+        User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(hotel.getOwner())){
+            throw new UnAuthorisedException("This user does not own this hotel with: {}"+hotel.getId());
+        }
         Room room = mapper.map(roomDto, Room.class);
         log.info("Room: {}, RoomDto: {}", room, roomDto);
 
@@ -69,6 +75,12 @@ public class RoomServiceImpl implements RoomService{
     @Transactional
     public void deleteRoomById(Long roomId) {
         Room room = roomRepository.findById(roomId).orElseThrow(()-> new ResourceNotFoundExceptions("room not found with ID: "+roomId));
+
+        User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(room.getHotel().getOwner())){
+            throw new UnAuthorisedException("This user does not own this hotel with: {}"+room.getHotel().getId());
+        }
+
         inventoryService.deleteFutureInventory(room);
         roomRepository.deleteById(roomId);
     }
